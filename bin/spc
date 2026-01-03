@@ -10,11 +10,14 @@ if (PHP_OS_FAMILY !== 'Windows' && PHP_BINARY !== (__DIR__ . '/php') && file_exi
 }
 
 if (file_exists(dirname(__DIR__) . '/vendor/autoload.php')) {
-    // Current: ./bin (git/project mode)
+    // Project mode
     require_once dirname(__DIR__) . '/vendor/autoload.php';
+} elseif (file_exists(dirname(__DIR__, 3) . '/vendor/autoload.php')) {
+    // Composer library mode
+    require_once dirname(__DIR__, 3) . '/vendor/autoload.php';
 } else {
-    // Current: ./vendor/crazywhalecc/static-php-cli/bin (composer library mode)
-    require_once dirname(__DIR__, 3) . '/autoload.php';
+    fwrite(STDERR, "Could not find autoload.php\n");
+    exit(255);
 }
 
 // 防止 Micro 打包状态下不支持中文的显示（虽然这个项目目前好像没输出过中文？）
