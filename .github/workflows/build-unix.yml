@@ -53,6 +53,10 @@ on:
         description: Keep debug symbols for debugging
         type: boolean
         default: false
+      build-frankenphp:
+        description: Build FrankenPHP binary
+        type: boolean
+        default: false
   workflow_call:
     inputs:
       os:
@@ -93,9 +97,13 @@ on:
         description: Keep debug symbols for debugging
         type: boolean
         default: false
+      build-frankenphp:
+        description: Build FrankenPHP binary
+        type: boolean
+        default: false
 
 env:
-    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
   define-build:
@@ -105,6 +113,7 @@ jobs:
       run: ${{ steps.gendef.outputs.run }}
       download: ${{ steps.gendef.outputs.download }}
       build: ${{ steps.gendef.outputs.build }}
+      install-pkg: ${{ steps.gendef.outputs.install-pkg }}
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
@@ -117,31 +126,37 @@ jobs:
               DOWN_CMD="./bin/spc-alpine-docker download"
               BUILD_CMD="./bin/spc-alpine-docker build"
               RUNS_ON="ubuntu-latest"
+              INSTALL_PKG_CMD="./bin/spc-alpine-docker install-pkg"
               ;;
             linux-aarch64)
               DOWN_CMD="./bin/spc-alpine-docker download"
               BUILD_CMD="./bin/spc-alpine-docker build"
               RUNS_ON="ubuntu-24.04-arm"
+              INSTALL_PKG_CMD="./bin/spc-alpine-docker install-pkg"
               ;;
             linux-x86_64-glibc)
               DOWN_CMD="./bin/spc-gnu-docker download"
               BUILD_CMD="./bin/spc-gnu-docker build"
               RUNS_ON="ubuntu-22.04"
+              INSTALL_PKG_CMD="./bin/spc-gnu-docker install-pkg"
               ;;
             linux-aarch64-glibc)
               DOWN_CMD="./bin/spc-gnu-docker download"
               BUILD_CMD="./bin/spc-gnu-docker build"
               RUNS_ON="ubuntu-22.04-arm"
+              INSTALL_PKG_CMD="./bin/spc-gnu-docker install-pkg"
               ;;
             macos-x86_64)
               DOWN_CMD="composer update --no-dev --classmap-authoritative && ./bin/spc doctor --auto-fix && ./bin/spc download"
               BUILD_CMD="./bin/spc build"
               RUNS_ON="macos-15-intel"
+              INSTALL_PKG_CMD="./bin/spc install-pkg"
               ;;
             macos-aarch64)
               DOWN_CMD="composer update --no-dev --classmap-authoritative && ./bin/spc doctor --auto-fix && ./bin/spc download"
               BUILD_CMD="./bin/spc build"
               RUNS_ON="macos-15"
+              INSTALL_PKG_CMD="./bin/spc install-pkg"
               ;;
           esac
           DOWN_CMD="$DOWN_CMD --with-php=${{ inputs.php-version }} --for-extensions=${{ inputs.extensions }} --ignore-cache-sources=php-src"
@@ -166,9 +181,13 @@ jobs:
           if [ ${{ inputs.build-fpm }} == true ]; then
               BUILD_CMD="$BUILD_CMD --build-fpm"
           fi
+          if [ ${{ inputs.build-frankenphp }} == true ]; then
+              BUILD_CMD="$BUILD_CMD --build-frankenphp"
+          fi
           echo 'download='"$DOWN_CMD" >> "$GITHUB_OUTPUT"
           echo 'build='"$BUILD_CMD" >> "$GITHUB_OUTPUT"
           echo 'run='"$RUNS_ON" >> "$GITHUB_OUTPUT"
+          echo 'install-pkg='"$INSTALL_PKG_CMD" >> "$GITHUB_OUTPUT"
   build:
     name: "Build ${{ inputs.version }} on ${{ inputs.os }}"
     runs-on: ${{ needs.define-build.outputs.run }}
@@ -194,6 +213,9 @@ jobs:
         with:
           path: downloads
           key: php-dependencies-${{ inputs.os }}
+      - if: ${{ inputs.build-frankenphp == true }}
+        name: "Install go-xcaddy for FrankenPHP"
+        run: ${{ needs.define-build.outputs.install-pkg }} go-xcaddy
       - name: "Download sources"
         run: ${{ needs.define-build.outputs.download }}
       - name: "Build PHP"
@@ -225,6 +247,14 @@ jobs:
         with:
           name: php-fpm-${{ inputs.php-version }}-${{ inputs.os }}
           path: buildroot/bin/php-fpm
+
+      # Upload FrankenPHP executable
+      - if: ${{ inputs.build-frankenphp == true }}
+        name: "Upload FrankenPHP SAPI"
+        uses: actions/upload-artifact@v4
+        with:
+          name: frankenphp-${{ inputs.php-version }}-${{ inputs.os }}
+          path: buildroot/bin/frankenphp
 
       # Upload extensions metadata
       - uses: actions/upload-artifact@v4
