@@ -1,0 +1,77 @@
+name: "Build FrankenPHP"
+
+on:
+  workflow_dispatch:
+    inputs:
+      os:
+        required: true
+        description: Build target OS
+        default: 'macos-aarch64'
+        type: choice
+        options:
+          - 'linux-x86_64'
+          - 'linux-aarch64'
+          - 'macos-x86_64'
+          - 'macos-aarch64'
+      extensions:
+        description: Extensions (xml required for macOS)
+        required: false
+        type: string
+        default: 'xml,ctype,curl,dom,fileinfo,filter,intl,mbstring,opcache,openssl,pdo,pdo_mysql,pdo_sqlite,phar,session,tokenizer,zip,zlib'
+      extra-libs:
+        description: Extra libraries (comma separated)
+        type: string
+        default: ''
+      debug:
+        description: Show full build logs
+        type: boolean
+        default: false
+
+jobs:
+  build-frankenphp-83:
+    name: "FrankenPHP 8.3 on ${{ inputs.os }}"
+    uses: ./.github/workflows/build-unix.yml
+    with:
+      os: ${{ inputs.os }}
+      php-version: '8.3'
+      extensions: ${{ inputs.extensions }}
+      extra-libs: ${{ inputs.extra-libs }}
+      build-cli: false
+      build-micro: false
+      build-fpm: false
+      build-frankenphp: true
+      prefer-pre-built: true
+      debug: ${{ inputs.debug }}
+    secrets: inherit
+
+  build-frankenphp-84:
+    name: "FrankenPHP 8.4 on ${{ inputs.os }}"
+    uses: ./.github/workflows/build-unix.yml
+    with:
+      os: ${{ inputs.os }}
+      php-version: '8.4'
+      extensions: ${{ inputs.extensions }}
+      extra-libs: ${{ inputs.extra-libs }}
+      build-cli: false
+      build-micro: false
+      build-fpm: false
+      build-frankenphp: true
+      prefer-pre-built: true
+      debug: ${{ inputs.debug }}
+    secrets: inherit
+
+  build-frankenphp-85:
+    name: "FrankenPHP 8.5-beta on ${{ inputs.os }}"
+    uses: ./.github/workflows/build-unix.yml
+    with:
+      os: ${{ inputs.os }}
+      php-version: '8.5'
+      extensions: ${{ inputs.extensions }}
+      extra-libs: ${{ inputs.extra-libs }}
+      build-cli: false
+      build-micro: false
+      build-fpm: false
+      build-frankenphp: true
+      prefer-pre-built: true
+      debug: ${{ inputs.debug }}
+    secrets: inherit

@@ -183,7 +183,7 @@ jobs:
               BUILD_CMD="$BUILD_CMD --build-fpm"
           fi
           if [ ${{ inputs.build-frankenphp }} == true ]; then
-              BUILD_CMD="$BUILD_CMD --build-frankenphp"
+              BUILD_CMD="$BUILD_CMD --build-frankenphp --enable-zts"
           fi
           echo 'download='"$DOWN_CMD" >> "$GITHUB_OUTPUT"
           echo 'build='"$BUILD_CMD" >> "$GITHUB_OUTPUT"
