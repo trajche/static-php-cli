@@ -1,4 +1,4 @@
-name: "Build FrankenPHP"
+name: "Build PHP CLI"
 
 on:
   workflow_dispatch:
@@ -31,8 +31,8 @@ env:
     xml,xmlreader,xmlwriter,xsl,zip,zlib
 
 jobs:
-  build-frankenphp-83:
-    name: "FrankenPHP 8.3 on ${{ inputs.os }}"
+  build-cli-83:
+    name: "PHP CLI 8.3 on ${{ inputs.os }}"
     uses: ./.github/workflows/build-unix.yml
     with:
       os: ${{ inputs.os }}
@@ -45,16 +45,16 @@ jobs:
         redis,session,shmop,simplexml,soap,sockets,sodium,
         sqlite3,sysvmsg,sysvsem,sysvshm,tokenizer,
         xml,xmlreader,xmlwriter,xsl,zip,zlib
-      build-cli: false
+      build-cli: true
       build-micro: false
       build-fpm: false
-      build-frankenphp: true
+      build-frankenphp: false
       prefer-pre-built: true
       debug: ${{ inputs.debug }}
     secrets: inherit
 
-  build-frankenphp-84:
-    name: "FrankenPHP 8.4 on ${{ inputs.os }}"
+  build-cli-84:
+    name: "PHP CLI 8.4 on ${{ inputs.os }}"
     uses: ./.github/workflows/build-unix.yml
     with:
       os: ${{ inputs.os }}
@@ -67,10 +67,10 @@ jobs:
         redis,session,shmop,simplexml,soap,sockets,sodium,
         sqlite3,sysvmsg,sysvsem,sysvshm,tokenizer,
         xml,xmlreader,xmlwriter,xsl,zip,zlib
-      build-cli: false
+      build-cli: true
       build-micro: false
       build-fpm: false
-      build-frankenphp: true
+      build-frankenphp: false
       prefer-pre-built: true
       debug: ${{ inputs.debug }}
     secrets: inherit
