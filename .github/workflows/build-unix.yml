@@ -214,6 +214,9 @@ jobs:
         with:
           path: downloads
           key: php-dependencies-${{ inputs.os }}
+      - if: ${{ startsWith(inputs.os, 'macos') }}
+        name: "Install Composer dependencies (macOS)"
+        run: composer update --no-dev --classmap-authoritative
       - if: ${{ inputs.build-frankenphp == true }}
         name: "Install go-xcaddy for FrankenPHP"
         run: ${{ needs.define-build.outputs.install-pkg }} go-xcaddy
