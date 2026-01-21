@@ -1,14 +1,6 @@
 name: Docs Auto Deploy
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'config/**.json'
-      - 'docs/**'
-      - 'package.json'
-      - 'yarn.lock'
-      - '.github/workflows/vitepress-deploy.yml'
+  workflow_dispatch:
 
 jobs:
   build:
